@@ -14,10 +14,25 @@ The token is written to `~/.vault-token` and the nonce to `~/.vault-nonce`.
 The agent will then block for half of the lease duration before attempting to reauthenticate with Vault using the 
 nonce value stored in `~/.vault-nonce`.
 
-## Usage
 
- Typical usage is: 
+## Quick start
+
+Options for getting started:
+
+* [Download the latest release](../../releases).
+* Clone the repo: `git clone https://github.com/Brightspace/vault-ec2auth-agent.git`.
+
  
-`vault-ec2auth-agent -role my_role`
- 
- Additional options can be seen by running the tool with no parameters.
+## Documentation
+
+* Typical usage: `vault-ec2auth-agent -role my_role` 
+* Additional options can be seen by running with no parameters.
+
+
+## Versioning
+
+Vault EC2Auth Agent releases are maintained under [the Semantic Versioning guidelines](http://semver.org/).
+
+## Contributing
+
+Please read through our [contributing guidelines](CONTRIBUTING.md). Included are directions for opening issues, coding standards, and notes on development.
