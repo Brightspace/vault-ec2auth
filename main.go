@@ -193,11 +193,8 @@ func vault_ec2_auth() (time.Time, string, string) {
 	if response.StatusCode >= 300 ||
 		response.StatusCode < 200 {
 
-		log.Println(string(body))
-		log.Println(response.Status)
 		b, _ := ioutil.ReadAll(response.Body)
-		log.Println(string(b))
-		panic("abrupt stop")
+		log.Fatalf("Login attempt failed with error code [%d %s]\n%s", response.StatusCode, response.Status, string(b))
 	}
 
 	result := LoginResponse{}
@@ -211,8 +208,7 @@ func vault_ec2_auth() (time.Time, string, string) {
 }
 
 func get_nonce() (bool, string) {
-	if fileInfo, err := os.Stat(config.NoncePath); os.IsExist(err) {
-		log.Printf("filesize is %d", fileInfo.Size())
+	if fileInfo, err := os.Stat(config.NoncePath); err == nil {
 		if fileInfo.Size() > 0 {
 			nonce, _ := ioutil.ReadFile(config.NoncePath)
 			return true, string(nonce)
