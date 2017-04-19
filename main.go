@@ -22,6 +22,7 @@ type Config struct {
 	VaultUrl  *url.URL
 	TokenPath string
 	NoncePath string
+	Agent   bool
 }
 
 type SealStatus struct {
@@ -88,6 +89,8 @@ func init() {
 	flag.StringVar(&config.NoncePath, "nonce-path", filepath.Join(usr.HomeDir, ".vault-nonce"), "the path to the nonce file")
 	flag.StringVar(&config.TokenPath, "token-path", filepath.Join(usr.HomeDir, ".vault-token"), "the path to the token file")
 
+	flag.BoolVar(&config.Agent, "agent", false, "setting this flag will run in agent mode")
+
 	flag.Parse()
 	if config.Role == "" {
 		flag.Usage()
@@ -104,6 +107,11 @@ func main() {
 		wait_until_lease_is_expired(lease_renewal_time)
 		wait_for_active_vault_server(config.VaultUrl.Hostname())
 		lease_renewal_time = ec2_auth_against_vault_server()
+
+		log.Printf("Successfully retrieved credentials. Credentials are valid until [%s].", lease_renewal_time.Format(time.RFC1123Z))
+		if !config.Agent {
+			break
+		}
 	}
 }
 
@@ -124,7 +132,7 @@ func wait_for_active_vault_server(server string) {
 		_, err := net.LookupHost(server)
 		if err != nil {
 			if _, ok := err.(*net.DNSError); ok {
-				log.Printf("waiting for vault server to be available at [%s]", server)
+				log.Printf("waiting for vault server to be available at [%s]..", server)
 			} else {
 				log.Fatal(err.Error())
 			}
@@ -136,7 +144,6 @@ func wait_for_active_vault_server(server string) {
 
 func wait_until_lease_is_expired(lease_renewal_time time.Time) {
 	delay := lease_renewal_time.Sub(time.Now())
-	log.Printf("sleeping for %f seconds", delay.Seconds())
 	time.Sleep(delay)
 }
 
@@ -183,12 +190,9 @@ func vault_ec2_auth() (time.Time, string, string) {
 		check(err)
 	}
 
-	log.Println(fmt.Sprintf("%s/v1/auth/aws-ec2/login", config.VaultUrl))
-
 	response, err := client.Post(fmt.Sprintf("%s/v1/auth/aws-ec2/login", config.VaultUrl), "application/json", bytes.NewBuffer(body))
 	check(err)
 	defer response.Body.Close()
-
 
 	if response.StatusCode >= 300 ||
 		response.StatusCode < 200 {
@@ -200,7 +204,6 @@ func vault_ec2_auth() (time.Time, string, string) {
 	result := LoginResponse{}
 	err = json.NewDecoder(response.Body).Decode(&result)
 	check(err)
-	log.Printf("%+v\n", result)
 
 	leaseEndTime := time.Now().Add(time.Second * time.Duration(result.Auth.LeaseDuration))
 

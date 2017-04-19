@@ -11,8 +11,8 @@ a token for the requested role.
  
 The token is written to `~/.vault-token` and the nonce to `~/.vault-nonce`.
 
-The agent will then block for half of the lease duration before attempting to reauthenticate with Vault using the 
-nonce value stored in `~/.vault-nonce`.
+If running in agent mode, it will then block for half of the lease duration before attempting to reauthenticate with Vault 
+using the nonce value stored in `~/.vault-nonce`.
 
 
 ## Quick start
@@ -25,9 +25,14 @@ Options for getting started:
  
 ## Documentation
 
-* Typical usage: `vault-ec2auth-agent -role my_role` 
+* Typical run-once usage: `vault-ec2auth-agent -role my_role` 
+* Run as agent usage: `vault-ec2auth-agent -agent -role my_role`
 * Additional options can be seen by running with no parameters.
 
+### Running as an agent
+
+By providing the `-agent` argument the agent will block until cancelled with `ctrl+c`. In this mode leases will be automatically
+renewed at the half-life of the lease.
 
 ## Versioning
 
