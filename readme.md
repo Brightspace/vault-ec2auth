@@ -1,8 +1,8 @@
 # Vault EC2Auth Agent
 
 This agent is intended to make EC2 authentication against Vault as simple as possible. Simply launch the agent in the
-background and anytime you need to access vault, your token is available at `~/.vault-token` which also happens to be
-the default location that the `vault` CLI looks for its access token by default! 
+background and anytime you need to access vault, your token is available at `~/.vault-token` which is the default location 
+that the `vault` CLI looks for its access token. 
 
 ## How it works
 
