@@ -1,8 +1,21 @@
-# Vault EC2Auth Agent
+# Vault-EC2Auth
 
 This agent is intended to make EC2 authentication against Vault as simple as possible. Simply launch the agent in the
 background and anytime you need to access vault, your token is available at `~/.vault-token` which is the default location 
 that the `vault` CLI looks for its access token. 
+
+## Quick start
+
+Options for getting started:
+
+* [Download the latest release](../../releases).
+* Clone the repo: `git clone https://github.com/Brightspace/vault-ec2auth.git`.
+
+Typical usage:
+
+* Run once and exit: `vault-ec2auth-agent -role my_role` 
+* Run as agent: `vault-ec2auth-agent -agent -role my_role`
+
 
 ## How it works
 
@@ -14,20 +27,9 @@ The token is written to `~/.vault-token` and the nonce to `~/.vault-nonce`.
 If running in agent mode, it will then block for half of the lease duration before attempting to reauthenticate with Vault 
 using the nonce value stored in `~/.vault-nonce`.
 
-
-## Quick start
-
-Options for getting started:
-
-* [Download the latest release](../../releases).
-* Clone the repo: `git clone https://github.com/Brightspace/vault-ec2auth-agent.git`.
-
- 
 ## Documentation
 
-* Typical run-once usage: `vault-ec2auth-agent -role my_role` 
-* Run as agent usage: `vault-ec2auth-agent -agent -role my_role`
-* Additional options can be seen by running with no parameters.
+* Additional options can be seen by running the tool with no parameters.
 
 ### Running as an agent
 
