@@ -6,7 +6,6 @@ import (
 	"time"
 	"io/ioutil"
 	"path/filepath"
-	"os/user"
 	"net/http"
 	"encoding/json"
 	"crypto/tls"
@@ -15,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"flag"
+	"github.com/mitchellh/go-homedir"
 )
 
 type Config struct {
@@ -77,8 +77,10 @@ var config Config
 
 func init() {
 	var err error
-	usr, _ := user.Current()
 	var vaultUrlParameter string
+
+	homeDir, err := homedir.Dir()
+	check(err)
 
 	flag.StringVar(&vaultUrlParameter, "vault-url", "https://vault.service.consul:8200", "the full url to the vault node to auth against")
 	config.VaultUrl, err = url.Parse(vaultUrlParameter)
@@ -86,8 +88,8 @@ func init() {
 
 	flag.StringVar(&config.Role, "role", "", "the vault role to request")
 
-	flag.StringVar(&config.NoncePath, "nonce-path", filepath.Join(usr.HomeDir, ".vault-nonce"), "the path to the nonce file")
-	flag.StringVar(&config.TokenPath, "token-path", filepath.Join(usr.HomeDir, ".vault-token"), "the path to the token file")
+	flag.StringVar(&config.NoncePath, "nonce-path", filepath.Join(homeDir, ".vault-nonce"), "the path to the nonce file")
+	flag.StringVar(&config.TokenPath, "token-path", filepath.Join(homeDir, ".vault-token"), "the path to the token file")
 
 	flag.BoolVar(&config.Agent, "agent", false, "setting this flag will run in agent mode")
 
