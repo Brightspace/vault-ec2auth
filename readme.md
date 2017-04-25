@@ -13,8 +13,8 @@ Options for getting started:
 
 Typical usage:
 
-* Run once and exit: `vault-ec2auth-agent -role my_role` 
-* Run as agent: `vault-ec2auth-agent -agent -role my_role`
+* Run once and exit: `vault-ec2auth -role my_role` 
+* Run as agent: `vault-ec2auth -agent -role my_role`
 
 
 ## How it works
