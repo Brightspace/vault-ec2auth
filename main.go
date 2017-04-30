@@ -17,19 +17,20 @@ limitations under the License.
 package main
 
 import (
-	"net"
-	"log"
-	"time"
-	"io/ioutil"
-	"path/filepath"
-	"net/http"
-	"encoding/json"
-	"crypto/tls"
 	"bytes"
-	"net/url"
-	"fmt"
-	"os"
+	"crypto/tls"
+	"encoding/json"
 	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -38,11 +39,11 @@ type Config struct {
 	VaultUrl  *url.URL
 	TokenPath string
 	NoncePath string
-	Agent   bool
+	Agent     bool
 }
 
 type SealStatus struct {
-	Sealed      bool `json:"sealed"`
+	Sealed      bool   `json:"sealed"`
 	Version     string `json:"version"`
 	ClusterName string `json:"cluster_name"`
 }
@@ -60,9 +61,9 @@ type ReLoginRequest struct {
 
 type LoginResponse struct {
 	Auth struct {
-		Renewable     bool `json:"renewable"`
+		Renewable     bool  `json:"renewable"`
 		LeaseDuration int32 `json:"lease_duration"`
-		MetaData struct {
+		MetaData      struct {
 			RoleTagMaxTtl string `json:"role_tag_max_ttl"`
 			Role          string `json:"role"`
 			Region        string `json:"region"`
@@ -71,19 +72,19 @@ type LoginResponse struct {
 			AmiId         string `json:"ami_id"`
 		} `json:"metadata"`
 		Policies    []string `json:"policies"`
-		Accessor    string `json:"accessor"`
-		ClientToken string `json:"client_token"`
+		Accessor    string   `json:"accessor"`
+		ClientToken string   `json:"client_token"`
 	} `json:"auth"`
 	Warnings []string `json:"warnings"`
 	WrapInfo struct {
 		TTL             time.Duration `json:"ttl"`
-		Token           string `json:"token"`
-		CreationTime    time.Time `json:"creation_time"`
-		WrappedAccessor string `json:"wrapped_accessor"`
-		Format          string `json:"format"`
+		Token           string        `json:"token"`
+		CreationTime    time.Time     `json:"creation_time"`
+		WrappedAccessor string        `json:"wrapped_accessor"`
+		Format          string        `json:"format"`
 	} `json:"wrap_info"`
-	LeaseDuration int32 `json:"lease_duration"`
-	Renewable     bool `json:"renewable"`
+	LeaseDuration int32  `json:"lease_duration"`
+	Renewable     bool   `json:"renewable"`
 	LeaseId       string `json:"lease_id"`
 	RequestId     string `json:"request_id"`
 }
@@ -99,21 +100,19 @@ func init() {
 	check(err)
 
 	flag.StringVar(&vaultUrlParameter, "vault-url", "https://vault.service.consul:8200", "the full url to the vault node to auth against")
-	config.VaultUrl, err = url.Parse(vaultUrlParameter)
-	check(err)
-
 	flag.StringVar(&config.Role, "role", "", "the vault role to request")
-
 	flag.StringVar(&config.NoncePath, "nonce-path", filepath.Join(homeDir, ".vault-nonce"), "the path to the nonce file")
 	flag.StringVar(&config.TokenPath, "token-path", filepath.Join(homeDir, ".vault-token"), "the path to the token file")
-
 	flag.BoolVar(&config.Agent, "agent", false, "setting this flag will run in agent mode")
-
 	flag.Parse()
+
 	if config.Role == "" {
 		flag.Usage()
 		log.Fatal("Must provide a role to auth with.")
 	}
+
+	config.VaultUrl, err = url.Parse(vaultUrlParameter)
+	check(err)
 
 	init_httpClient()
 }
