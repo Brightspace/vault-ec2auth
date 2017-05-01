@@ -35,11 +35,12 @@ import (
 )
 
 type Config struct {
-	Role      string
-	VaultUrl  *url.URL
-	TokenPath string
-	NoncePath string
-	Agent     bool
+	Role       string
+	VaultUrl   *url.URL
+	TokenPath  string
+	NoncePath  string
+	Agent      bool
+	RetryDelay int
 }
 
 type SealStatus struct {
@@ -104,6 +105,7 @@ func init() {
 	flag.StringVar(&config.NoncePath, "nonce-path", filepath.Join(homeDir, ".vault-nonce"), "the path to the nonce file")
 	flag.StringVar(&config.TokenPath, "token-path", filepath.Join(homeDir, ".vault-token"), "the path to the token file")
 	flag.BoolVar(&config.Agent, "agent", false, "setting this flag will run in agent mode")
+	flag.IntVar(&config.RetryDelay, "retry-delay", 30, "The number of seconds between retries between failed login attempts")
 	flag.Parse()
 
 	if config.Role == "" {
@@ -165,9 +167,22 @@ func wait_until_lease_is_expired(lease_renewal_time time.Time) {
 }
 
 func ec2_auth_against_vault_server() time.Time {
-	lease_end_time, vault_token, vault_nonce := vault_ec2_auth()
+	var lease_end_time time.Time
+	var vault_token string
+	var vault_nonce string
+	var err error
 
-	err := ioutil.WriteFile(config.TokenPath, []byte(vault_token), 0660)
+	for {
+		lease_end_time, vault_token, vault_nonce, err = vault_ec2_auth()
+		if err != nil {
+			log.Print(err.Error())
+			time.Sleep(time.Second * time.Duration(config.RetryDelay))
+		} else {
+			break
+		}
+	}
+
+	err = ioutil.WriteFile(config.TokenPath, []byte(vault_token), 0660)
 	check(err)
 
 	err = ioutil.WriteFile(config.NoncePath, []byte(vault_nonce), 0660)
@@ -182,7 +197,7 @@ func check(err error) {
 	}
 }
 
-func vault_ec2_auth() (time.Time, string, string) {
+func vault_ec2_auth() (time.Time, string, string, error) {
 	pkcs7, err := get_pkcs7()
 	check(err)
 
@@ -215,7 +230,9 @@ func vault_ec2_auth() (time.Time, string, string) {
 		response.StatusCode < 200 {
 
 		b, _ := ioutil.ReadAll(response.Body)
-		log.Fatalf("Login attempt failed with error code [%d %s]\n%s", response.StatusCode, response.Status, string(b))
+		err := fmt.Errorf("Login attempt failed with error code [%s] - %s", response.Status, string(b))
+
+		return time.Now(), "", "", err
 	}
 
 	result := LoginResponse{}
@@ -224,7 +241,7 @@ func vault_ec2_auth() (time.Time, string, string) {
 
 	leaseEndTime := time.Now().Add(time.Second * time.Duration(result.Auth.LeaseDuration))
 
-	return leaseEndTime, result.Auth.ClientToken, result.Auth.MetaData.Nonce
+	return leaseEndTime, result.Auth.ClientToken, result.Auth.MetaData.Nonce, nil
 }
 
 func get_nonce() (bool, string) {
