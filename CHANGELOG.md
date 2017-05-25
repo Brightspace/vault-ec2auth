@@ -1,5 +1,14 @@
 # Vault-Ec2Auth
 
+## 0.2.1
+
+### NOTES
+
+* Dropped the alpha tag from the versioning. [Semantic versioning](http://semver.org) applies.
+
+### IMPROVEMENTS
+
+* Apply the retry delay when waiting for the vault server to become available
 
 ## 0.2.0-alpha
 

@@ -151,7 +151,8 @@ func wait_for_active_vault_server(server string) {
 		_, err := net.LookupHost(server)
 		if err != nil {
 			if _, ok := err.(*net.DNSError); ok {
-				log.Printf("waiting for vault server to be available at [%s]..", server)
+				log.Printf("waiting for vault server to become available at [%s]..", server)
+				time.Sleep(time.Second * time.Duration(config.RetryDelay))
 			} else {
 				log.Fatal(err.Error())
 			}
