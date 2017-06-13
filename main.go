@@ -35,6 +35,7 @@ import (
 )
 
 type Config struct {
+	AwsMount   string
 	Role       string
 	VaultUrl   *url.URL
 	TokenPath  string
@@ -102,6 +103,7 @@ func init() {
 
 	flag.StringVar(&vaultUrlParameter, "vault-url", "https://vault.service.consul:8200", "the full url to the vault node to auth against")
 	flag.StringVar(&config.Role, "role", "", "the vault role to request")
+	flag.StringVar(&config.AwsMount, "aws-mount", "aws-ec2", "the AWS mount path (default: aws-ec2)")
 	flag.StringVar(&config.NoncePath, "nonce-path", filepath.Join(homeDir, ".vault-nonce"), "the path to the nonce file")
 	flag.StringVar(&config.TokenPath, "token-path", filepath.Join(homeDir, ".vault-token"), "the path to the token file")
 	flag.BoolVar(&config.Agent, "agent", false, "setting this flag will run in agent mode")
@@ -223,7 +225,7 @@ func vault_ec2_auth() (time.Time, string, string, error) {
 		check(err)
 	}
 
-	response, err := client.Post(fmt.Sprintf("%s/v1/auth/aws-ec2/login", config.VaultUrl), "application/json", bytes.NewBuffer(body))
+	response, err := client.Post(fmt.Sprintf("%s/v1/auth/%s/login", config.VaultUrl, config.AwsMount), "application/json", bytes.NewBuffer(body))
 	check(err)
 	defer response.Body.Close()
 
