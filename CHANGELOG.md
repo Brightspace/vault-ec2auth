@@ -1,5 +1,9 @@
 # Vault-Ec2Auth
 
+## 0.2.2
+### FEATURES
+* Add ability to specify aws-ec2 auth mount path. [mudasirmirza](https://github.com/Brightspace/vault-ec2auth/pull/3)
+
 ## 0.2.1
 
 ### NOTES
